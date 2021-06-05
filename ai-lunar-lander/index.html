@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Lander 101</title>
+        <!--graph-->
+        <script src="https://d3js.org/d3.v2.min.js?2.9.3"></script>
+        <script src="./src/lib/cola.js"></script>
+        <link rel="stylesheet" href="./src/lib/neataptic-graph.css">
+        <link rel="stylesheet" href="./src/index.css">
+
+        <!--Other stuff-->
+        <script src="./src/lib/neataptic.js"></script>
+    </head>
+    <body>
+        <div class="simulation">
+            <canvas></canvas>
+            <div class="genomeStats">
+            </div>
+            <div class="controls">
+                <h4>Configuration:</h4>
+                <div class="simulationSpeed">
+                    Simulation Speed: <span>1</span><input class="simulationSpeed" type="range" min="1" max="10" value="1">
+                </div>
+            </div>
+        </div>
+        <!--Popups-->
+        <svg class="bestGenome popup"></svg>
+        <!--Master script-->
+        <script src="./src/main.js" type="module"></script>
+    </body>
+</html>
