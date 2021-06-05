@@ -79,9 +79,7 @@ class Lander{
         if(this.stats.yoffset<10){
             this.stats.score -= 80 * Math.abs(this.stats.vy);
             this.stats.score -= 60 * Math.abs(this.stats.vx);
-            this.stats.score -= 80*this.stats.xoffset;
-            
-            this.stats.score -= 100*this.stats.xoffset;
+            this.stats.score -= 70*this.stats.xoffset;
         }else{
             this.stats.score -= 100000000;
             this.stats.score -= 100*Math.abs(this.stats.yoffset);
