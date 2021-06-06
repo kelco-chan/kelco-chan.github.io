@@ -1,7 +1,7 @@
 import Lander from "../physics/lander.js";
 import CONFIG from "../config.js";
 class AILander extends Lander{
-    constructor(pos,target,brain,verboseInfo){
+    constructor(pos,target,velocity,brain,verboseInfo){
         super(...arguments);
         this.brain = brain;
         this.verboseInfo = !!verboseInfo;//Boolean
@@ -33,8 +33,8 @@ class AILander extends Lander{
             this.usedFuel/CONFIG.maxFuel
         ]
     }
-    render(ctx){
-        return super.render(ctx,"rgba(255,0,0,0.1)",this.verboseInfo)
+    render(ctx,_,offset){
+        super.render(ctx,"rgba(255,0,0,0.1)",offset,this.verboseInfo)
     }
 }
 export default AILander;

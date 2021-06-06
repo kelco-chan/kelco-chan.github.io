@@ -4,6 +4,7 @@ import AILander from "./ai-lander.mjs";
 import Vector from "../physics/vector.js";
 import KeyboardLander from "../physics/keyboard-lander.js";
 import drawGraph from "../lib/neataptic-graph.js";
+import runLanders from "../physics/simulation.js";
 
 const containers = {
     statsDiv:document.querySelector(".genomeStats")
@@ -53,8 +54,6 @@ async function train(neat,ctx,firstRun,loop){
     if(firstRun && localStorage.getItem("population") && localStorage.getItem("population-gen")){
         neat.import(JSON.parse(localStorage.getItem("population")));
         neat.generation = parseInt(localStorage.getItem("population-gen"));
-        //render the best genome
-        //drawGraph(neat.population[0].graph(300,300),".bestGenome",600,600);
     }
 
     //woah pop into NEXT GENERATION <o/
@@ -64,17 +63,18 @@ async function train(neat,ctx,firstRun,loop){
     }
     
     let target = {
-        x:CONFIG.width*Math.random(),
-        y:CONFIG.height-10
+        x:CONFIG.width*Math.random()/CONFIG.scale,//m
+        y:CONFIG.height-10/CONFIG.scale //m
     }
     //init all the landers lol
     let landers = [];
+    let startingVelocity = new Vector(0,0);
     let startingPos = new Vector(CONFIG.width*Math.random(),10);
     
     for(let genome of neat.population){
-        landers.push(new AILander(startingPos.copy(),target,genome));
+        landers.push(new AILander(startingPos.copy(),target,startingVelocity.copy(),genome));
     }
-    landers.push(new KeyboardLander(startingPos.copy(),target))
+    landers.push(new KeyboardLander(startingPos.copy(),target,startingVelocity.copy()))
     
     //run landers
     ctx.font="15px Calibri";
@@ -86,23 +86,24 @@ async function train(neat,ctx,firstRun,loop){
     console.log();
     
     //render the best genome
-    //drawGraph(neat.getFittest().graph(300,300),".bestGenome",600,600);
+    if(CONFIG.drawNetworkGraph) drawGraph(neat.getFittest().graph(300,300),".bestGenome",600,600);
     //draw in the stuff
-    let scores = neat.population.map(n=>n.score).sort((a,b)=>a-b)
+    let scores = neat.population.map(n=>n.score).sort((a,b)=>b-a)
+
     containers.statsDiv.innerHTML += `
     <b>Generation ${neat.generation} statistics</b>
     Human Player:
     Score: ${landers[landers.length-1].stats.score.toFixed(0)}
 
     AI:
-    Median Score: ${(scores[Math.floor(scores.length/2)]).toFixed(0)}
+    Q1 score: ${(scores[Math.floor(scores.length*3/4)]).toFixed(0)}
+    Q3 score: ${(scores[Math.floor(scores.length*1/4)]).toFixed(0)}
     Max Score: ${neat.getFittest().score.toFixed(0)}
 
 
     <b> Now Running generation ${neat.generation+1} </b>
     `.replaceAll("\n","<br>");
 
-    //scroll
     containers.statsDiv.scrollTop  = containers.statsDiv.scrollHeight;
 
     localStorage.setItem("population",JSON.stringify(neat.export()));
@@ -124,45 +125,5 @@ async function train(neat,ctx,firstRun,loop){
     neat.mutate();
     //all over again :)
     train(neat,ctx);
-}
-function runLanders(landers,target,ctx){
-    return new Promise(function(res){
-        let lastRunTime = null;
-        function loop(time){
-            if(lastRunTime===null){
-                lastRunTime = time;
-            };
-            let ms = time-lastRunTime;
-            ms*=CONFIG.simulationSpeed;
-            //clear canvas
-            if(ctx){
-                ctx.fillStyle="rgba(255,255,255,1)";
-                ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-                //render target
-                ctx.fillStyle = "black";
-                
-                ctx.fillRect(target.x-5,target.y-5,10,10);
-            }
-            landers.forEach(l=>{
-                ctx&&l.render(ctx);
-                l.update(ms);
-            });
-
-            if(landers.every(l=>l.finished)){
-                res();
-                return;
-            }
-            //ending  stuff
-            lastRunTime = time;
-            requestAnimationFrame(loop);
-        }
-        requestAnimationFrame(loop); 
-    });
-}
-async function replayBest(neat,ctx,startingPos,target){
-    let landers = [new KeyboardLander(startingPos.copy(),target)];
-    landers.push(new AILander(startingPos,target,neat.getFittest(),true));
-    await runLanders(landers,target,ctx)
-    ctx.clearRect(0,0,CONFIG.width,CONFIG.height)
 }
 export {train,initNeat};

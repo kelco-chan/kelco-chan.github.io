@@ -1,15 +1,15 @@
 "use strict";
 import Vector from "./vector.js";
 import CONFIG from "../config.js";
-/**Needs vector.js and config to work */
+const landerPixelHeight = CONFIG.scale*CONFIG.landerHeight
 class Lander{
     /**
      * 
      * @param {Vector} pos - position vector
      */
-    constructor(pos,target){
+    constructor(pos,target,velocity){
         this.pos = pos;
-        this.v = new Vector(0,0);
+        this.v = velocity || new Vector(0,0);
         this.usedFuel = 0;
         this.finished = false;
         this.msRemaining = CONFIG.maxFlightTime;
@@ -19,18 +19,18 @@ class Lander{
         }
     }
     fireNozzle(index,throttle){
-        if(!throttle || throttle<0.25 || throttle>1) return false;//too, no firing occured
-        let finalThrust = CONFIG.minNozzleThrust+throttle*(CONFIG.maxNozzleThrust-CONFIG.minNozzleThrust);//add minimum and mximum thrust
-        this.usedFuel+=finalThrust;
-        if(index===0){//left
-            this.v.add(new Vector(-finalThrust,0));
-        }else if(index===1){//right
-            this.v.add(new Vector(finalThrust,0));
+        if(!throttle || throttle<0.1 || throttle>1) return false;//too little throttle, no firing occured
+        let finalThrust;
+        if(index===0 || index===1){// 1 fires left engine, 0 fires right engine
+            finalThrust = throttle*CONFIG.maxSideNozzleThrust
+            this.v.add(new Vector( (index === 1 ? 1 : -1) * finalThrust,0));
         }else if(index===2){//bottom
+            finalThrust = throttle*CONFIG.maxMainNozzleThrust;
             this.v.add(new Vector(0,-finalThrust));
         }else{
             throw new Error(`Unknown nozzle "${index}"`);        
         }
+        this.usedFuel+=finalThrust;
         return true;//nozzle actually fired
     }
     fireNozzles(throttles){
@@ -41,24 +41,18 @@ class Lander{
     update(ms){
         if(this.finished) return;
         if(ms>2000){
-            return;//person left the sim and came back, skip thsi loop and come backlater
+            return;//person left the sim and came back, skip this loop and come back later
         }
         this.msRemaining -= ms;
         this.v.add(new Vector(0,CONFIG.grav).scale(ms/1000,true))//gravity exists btw;
+
         this.v.x = Math.min(Math.max(-CONFIG.maxComponentSpeed,this.v.x),CONFIG.maxComponentSpeed);
         this.v.y = Math.min(Math.max(-CONFIG.maxComponentSpeed,this.v.y),CONFIG.maxComponentSpeed);
         //debugger;
         this.pos.add(this.v.scale(ms/1000,true));
-        //penalty of floating away horizontally
-        if((this.pos.x>CONFIG.width) || (this.pos.x<0)){
-            this.stats.penalty+=1000000;
-        }
-        //penalty fo y position
-        if(this.pos.y<0){
-            this.stats.penalty+=1000000;
-        }
+
         //update velocity
-        if((this.pos.y>this.target.y-10) || (this.msRemaining<=0) || (this.pos.y<-10) || (this.pos.x<-10) || (this.pos.x>CONFIG.width+10)){
+        if((this.pos.y>this.target.y-10) || (this.msRemaining<=0)){
             this.finished = true;
             this.calculateStats();
         }
@@ -68,38 +62,41 @@ class Lander{
             xoffset: Math.abs(this.target.x-this.pos.x),
             yoffset: Math.abs(this.target.y-this.pos.y),
             fuel:this.usedFuel,
-            vy:this.v.y,
-            vx:this.v.x,
+            v:this.v.magnitude,
             speed:this.v.magnitude,
             penalty:this.stats.penalty
         }
         this.stats.score = 0;
         this.stats.score -= this.stats.penalty;
         this.stats.score -= 0.2*this.stats.fuel;
-        if(this.stats.yoffset<10){
-            this.stats.score -= 80 * Math.abs(this.stats.vy);
-            this.stats.score -= 60 * Math.abs(this.stats.vx);
-            if(this.stats.xoffset>20){
-                this.stats.score -= 80*this.stats.xoffset;
-            }
-        }else{
-            this.stats.score -= 100000000;
+        this.stats.score -= 160 * Math.abs(this.stats.v);
+        if(this.stats.yoffset > 10){
+            this.stats.score -= 10*1000;
             this.stats.score -= 100*Math.abs(this.stats.yoffset);
+        }
+        if(this.stats.xoffset > 20){
+            this.stats.score -= 80*this.stats.xoffset;
         }
         return this.stats;
     }
     /**
-     * 
-     * @param {CanvasRenderingContext2D} ctx - ctx for canvas 
+     * Renders a lander
+     * @param {*} ctx 
+     * @param {String} color - ctx color
+     * @param {Boolean} verboseInfo - whether or not to show velocity info
+     * @param {Vector} offset - offset to render lander by
      */
-    render(ctx,color="rgba(255,0,0,0.1)",verboseInfo){
-        //lander is a pos of 20 by 20
+    render(ctx,color="rgba(255,0,0,0.1)",offset,verboseInfo){
+        //lander is 3px by 3px
         ctx.fillStyle=color;
-        ctx.fillRect(this.pos.x-10,this.pos.y-10,20,20);
+        //scale the position of the lander by CONFIG.scale
+        let renderPos = this.pos.scale(CONFIG.scale,true).shift(-landerPixelHeight/2,-landerPixelHeight/2).add(offset);
+        ctx.fillRect(renderPos.x,renderPos.y,landerPixelHeight,landerPixelHeight);
         if(verboseInfo){
             ctx.fillStyle = "black";
             ctx.fillText(`V: ${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)}\nHorizontal displacement: ${(this.target.x-this.pos.x).toFixed(1)}, ${(this.target.y-this.pos.y).toFixed(1)}`,this.pos.x,this.pos.y-10);
         }
+        return renderPos;
     }
 }
 export default Lander;

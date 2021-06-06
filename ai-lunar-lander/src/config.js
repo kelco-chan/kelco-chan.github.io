@@ -1,17 +1,21 @@
 const CONFIG = {
-    grav:15, //px s^-2
-    nozzleThrust:1.7, //ms^-1
-    maxNozzleThrust:10,
-    minNozzleThrust:0,
+    grav:9.8/6*4, //px s^-2
+    scale: 6/7.01, //px m^-1
+    maxMainNozzleThrust:2.97, //ms^-1
+    maxSideNozzleThrust:2.97*0.3, //m s^-1
     maxFuel:1500,
-    maxComponentSpeed:600,
+    maxComponentSpeed:600,//m s^-1
     PLAYER_AMOUNT:600,
     MUTATION_RATE:0.7,
     ELITISM: 200,
-    width:1000,//window.innerWidth,
-    height:700,//window.innerHeight,
-    maxFlightTime: 25*1000,
-    simulationSpeed: 1
+    width:1000,//px
+    height:700,//px
+    maxFlightTime: 30*1000,
+    simulationSpeed: 1,
+    drawNetworkGraph:false,
+    landerHeight:7.01, //m
+    simulationBackgroundColor:"rgba(255,255,255,1)",
+    enablePrototypeScrolling:false
 }
 CONFIG.set = function(property,value){
     CONFIG[property] = value;

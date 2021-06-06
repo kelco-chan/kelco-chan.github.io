@@ -11,11 +11,14 @@ class Vector{
      * @param {Boolean} returnnew - whether or not to return new vector
      */
     add(v2,returnnew){
+        return this.shift(v2.x,v2.y,returnnew);
+    }
+    shift(x,y,returnnew){
         if(returnnew){
-            return new Vector(this.x+v2.x,this.y+v2.y);
+            return new Vector(this.x+x,this.y+y);
         }else{
-            this.x+=v2.x;
-            this.y+=v2.y;
+            this.x+=x;
+            this.y+=y;
             return this;
         }
     }
@@ -31,7 +34,7 @@ class Vector{
     copy(){
         return new Vector(this.x,this.y);
     }
-    scaleTo(magnitude,returnnew){
+    scaleTo(magnitude=10,returnnew){
         return this.scale(magnitude/this.magnitude,returnnew);
     }
     toString(){

@@ -13,13 +13,13 @@ class KeyboardLander extends Lander{
     }
     update(){
         if(pressed.ArrowUp){
-            this.fireNozzle(2,0.5);
+            this.fireNozzle(2,1);
         }
         if(pressed.ArrowLeft){
-            this.fireNozzle(0,0.5);
+            this.fireNozzle(0,1);
         }
         if(pressed.ArrowRight){
-            this.fireNozzle(1,0.5);
+            this.fireNozzle(1,1);
         }
         super.update(...arguments);
     }
@@ -32,8 +32,8 @@ class KeyboardLander extends Lander{
      * 
      * @param {CanvasRenderingContext2D} ctx 
      */
-    render(ctx){
-        super.render(ctx,"green",false);
+    render(ctx,_,offset){
+        return super.render(ctx,"green",offset,false);
     }
 }
 export default KeyboardLander;
