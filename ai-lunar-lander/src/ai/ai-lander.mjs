@@ -8,11 +8,12 @@ class AILander extends Lander{
     }
     update(ms){
         if(this.finished) return;
-        this.fireNozzles(this.brain.activate(this.inputs));
+        this.fireNozzles(this.brain.activate(this.inputs),ms);
         super.update(...arguments);//imagine doing fisiks lol
         if(this.stats){
             //stats were calculated, give it to the brain
             this.brain.score=this.stats.score;
+            this.brain.fuel = this.stats.usedFuel;
         }
         //console.log(`Updated pos to ${this.pos.x}, ${this.pos.y}`)
     }
@@ -22,15 +23,13 @@ class AILander extends Lander{
         return this.stats;
     }
     get inputs(){
-        //returns the state of the current thing
+        //returns the state of the lander
         return [
-            this.pos.x/CONFIG.width,
-            this.pos.y/CONFIG.height,
             this.v.x/(2*CONFIG.maxComponentSpeed)+0.5,
             this.v.y/(2*CONFIG.maxComponentSpeed)+0.5,
-            this.target.x/CONFIG.width,
-            this.target.y/CONFIG.height,
-            this.usedFuel/CONFIG.maxFuel
+            Math.max(Math.min(600,this.pos.x-this.target.x),-600)/1200 + 0.5,
+            Math.min(this.pos.y-this.target.y,1000)/1000,
+            //this.usedFuel/CONFIG.maxFuel
         ]
     }
     render(ctx,_,offset){

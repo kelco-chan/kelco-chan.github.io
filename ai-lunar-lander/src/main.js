@@ -2,8 +2,8 @@ import {train,initNeat} from "./ai/trainer.js";
 import CONFIG from "./config.js";
 
 const canvas = document.querySelector("canvas");
-canvas.width = canvas.offsetWidth;
-canvas.height = canvas.offsetHeight;
+canvas.width = /*CONFIG.width*/canvas.offsetWidth;
+canvas.height = /*CONFIG.height*/canvas.offsetHeight;
 const ctx = canvas.getContext("2d");
 
 document.querySelectorAll("input[type='checkbox']").forEach(i=>i.checked=false);
@@ -17,7 +17,7 @@ document.querySelector("input.pathTracing").addEventListener("change",function()
 });
 document.querySelector(".enablePrototypeScrolling input").addEventListener("change",function(){
     CONFIG.set("enablePrototypeScrolling",this.checked);
-})
+});
 
 
 let neat = initNeat();

@@ -15,7 +15,7 @@ let {Neat,Methods,Architect} = neataptic;
 function initNeat(){
     neataptic.Config.warnings = false;
     return new Neat(
-        5, 3,
+        4, 3,
         null,
         {
             mutation: [
@@ -39,7 +39,10 @@ function initNeat(){
         }
         );
 }
-    
+
+function deviate(maxAmplitude){
+    return 2*maxAmplitude*Math.random()-maxAmplitude;
+}
 
 /**
  * Trains Landers
@@ -62,19 +65,16 @@ async function train(neat,ctx,firstRun,loop){
         document.querySelector(".genomeStats").innerHTML=`<b>Computing generation ${neat.generation}...</b>`;
     }
     
-    let target = {
-        x:CONFIG.width*Math.random()/CONFIG.scale,//m
-        y:CONFIG.height-10/CONFIG.scale //m
-    }
+    let target = CONFIG.initialConditions.targetDisplacement.shift(0,CONFIG.landerHeight/2,true);
     //init all the landers lol
     let landers = [];
-    let startingVelocity = new Vector(0,0);
-    let startingPos = new Vector(CONFIG.width*Math.random(),10);
+    let startingVelocity = CONFIG.initialConditions.velocity;
+    let startingPos = new Vector(0,0);
     
     for(let genome of neat.population){
         landers.push(new AILander(startingPos.copy(),target,startingVelocity.copy(),genome));
     }
-    landers.push(new KeyboardLander(startingPos.copy(),target,startingVelocity.copy()))
+    landers.push(new KeyboardLander(startingPos.copy(),target,startingVelocity.copy()));
     
     //run landers
     ctx.font="15px Calibri";
@@ -82,7 +82,7 @@ async function train(neat,ctx,firstRun,loop){
     ctx.clearRect(0,0,CONFIG.width,CONFIG.height);
     ctx.fillText(`Computing generation ${neat.generation}`,0,30)
     await runLanders(landers,target,/*null*/(neat.generation%1===0)?ctx:null);
-
+    debugger;
     console.log();
     
     //render the best genome

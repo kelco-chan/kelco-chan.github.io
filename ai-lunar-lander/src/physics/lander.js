@@ -18,14 +18,14 @@ class Lander{
             penalty:0
         }
     }
-    fireNozzle(index,throttle){
+    fireNozzle(index,throttle,ms){
         if(!throttle || throttle<0.1 || throttle>1) return false;//too little throttle, no firing occured
         let finalThrust;
         if(index===0 || index===1){// 1 fires left engine, 0 fires right engine
-            finalThrust = throttle*CONFIG.maxSideNozzleThrust
+            finalThrust = throttle*CONFIG.maxSideNozzleThrust*ms/1000;
             this.v.add(new Vector( (index === 1 ? 1 : -1) * finalThrust,0));
         }else if(index===2){//bottom
-            finalThrust = throttle*CONFIG.maxMainNozzleThrust;
+            finalThrust = throttle*CONFIG.maxMainNozzleThrust*ms/1000;
             this.v.add(new Vector(0,-finalThrust));
         }else{
             throw new Error(`Unknown nozzle "${index}"`);        
@@ -33,10 +33,10 @@ class Lander{
         this.usedFuel+=finalThrust;
         return true;//nozzle actually fired
     }
-    fireNozzles(throttles){
-        this.fireNozzle(0,throttles[0]);
-        this.fireNozzle(1,throttles[1]);
-        this.fireNozzle(2,throttles[2]);
+    fireNozzles(throttles,ms){
+        this.fireNozzle(0,throttles[0],ms);
+        this.fireNozzle(1,throttles[1],ms);
+        this.fireNozzle(2,throttles[2],ms);
     }
     update(ms){
         if(this.finished) return;
@@ -52,7 +52,7 @@ class Lander{
         this.pos.add(this.v.scale(ms/1000,true));
 
         //update velocity
-        if((this.pos.y>this.target.y-10) || (this.msRemaining<=0)){
+        if((this.pos.y> this.target.y - CONFIG.landerHeight/2 + 0.3) || (this.msRemaining<=0)){
             this.finished = true;
             this.calculateStats();
         }

@@ -11,15 +11,15 @@ class KeyboardLander extends Lander{
         super(...arguments);
         this.isPlayer = true;
     }
-    update(){
+    update(ms){
         if(pressed.ArrowUp){
-            this.fireNozzle(2,1);
+            this.fireNozzle(2,1,ms);
         }
         if(pressed.ArrowLeft){
-            this.fireNozzle(0,1);
+            this.fireNozzle(0,1,ms);
         }
         if(pressed.ArrowRight){
-            this.fireNozzle(1,1);
+            this.fireNozzle(1,1,ms);
         }
         super.update(...arguments);
     }

@@ -1,0 +1,41 @@
+Date : 2021-06-08 08:54:00
+Directory : c:\Users\User\OneDrive - Department of Education and Training\projects\github.io
+Total : 11 files,  452 codes, 55 comments, 34 blanks, all 541 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JavaScript |          8 |        371 |         51 |         31 |        453 |
+| CSS        |          1 |         48 |          0 |          1 |         49 |
+| HTML       |          2 |         33 |          4 |          2 |         39 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                            | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                               |         11 |        452 |         55 |         34 |        541 |
+| ai-lunar-lander                                                                                                                 |         10 |        451 |         55 |         33 |        539 |
+| ai-lunar-lander\src                                                                                                             |          9 |        419 |         51 |         32 |        502 |
+| ai-lunar-lander\src\ai                                                                                                          |          2 |        125 |         21 |         21 |        167 |
+| ai-lunar-lander\src\physics                                                                                                     |          4 |        204 |         30 |          5 |        239 |
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                                                        | language   | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\index.html                     | HTML       |         32 |          4 |          1 |         37 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\ai\ai-lander.mjs           | JavaScript |         34 |          4 |          0 |         38 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\ai\trainer.js              | JavaScript |         91 |         17 |         21 |        129 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\config.js                  | JavaScript |         23 |          0 |          0 |         23 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\index.css                  | CSS        |         48 |          0 |          1 |         49 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\main.js                    | JavaScript |         19 |          0 |          5 |         24 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\physics\keyboard-lander.js | JavaScript |         33 |          6 |          0 |         39 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\physics\lander.js          | JavaScript |         85 |         15 |          3 |        103 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\physics\simulation.js      | JavaScript |         46 |          5 |          2 |         53 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\ai-lunar-lander\src\physics\vector.js          | JavaScript |         40 |          4 |          0 |         44 |
+| c:\Users\User\OneDrive - Department of Education and Training\projects\github.io\index.html                                     | HTML       |          1 |          0 |          1 |          2 |
+| Total                                                                                                                           |            |        452 |         55 |         34 |        541 |
++---------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
