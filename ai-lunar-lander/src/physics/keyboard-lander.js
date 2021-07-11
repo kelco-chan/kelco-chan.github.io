@@ -1,7 +1,12 @@
 import Lander from "./lander.js";
+import CONFIG from "../config.js";
 let pressed = {};
+let hide = false;
 document.addEventListener("keydown",(e)=>{
     pressed[e.key]=true;
+    if(e.key === "h"){
+        hide = !hide;
+    }
 });
 document.addEventListener("keyup",(e)=>{
     pressed[e.key]=false;
@@ -10,8 +15,10 @@ class KeyboardLander extends Lander{
     constructor(){
         super(...arguments);
         this.isPlayer = true;
+        this.name="Player";
     }
     update(ms){
+        this.hidden = hide;
         if(pressed.ArrowUp){
             this.fireNozzle(2,1,ms);
         }
@@ -22,11 +29,6 @@ class KeyboardLander extends Lander{
             this.fireNozzle(1,1,ms);
         }
         super.update(...arguments);
-    }
-    calculateStats(){
-        super.calculateStats(...arguments);
-        //console.log("Player score",this.stats.score);
-        //console.log("Stats",this.stats)
     }
     /**
      * 

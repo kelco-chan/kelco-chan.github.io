@@ -3,38 +3,37 @@
     <head>
         <title>Lander 101</title>
         <!--graph-->
-        <script src="https://d3js.org/d3.v2.min.js?2.9.3"></script>
-        <script src="./src/lib/cola.js"></script>
-        <link rel="stylesheet" href="./src/lib/neataptic-graph.css">
         <link rel="stylesheet" href="./src/index.css">
-
+        <!--Telementry-->
+        <script src="./src/telementry.js"></script>
         <!--Other stuff-->
         <script src="./src/lib/neataptic.js"></script>
     </head>
     <body>
         <div class="simulation">
             <div class="title">
-                <div style="font-size: large;">How to: Land a lander efficiently <s>safely</s> on the moon.</div>
+                <div style="font-size: large; margin-top: 10px">How to: Land a lander efficiently <s>safely</s> on the moon.</div>
                 <div style="margin-top: 10px;">By Kelvin Chan</div>
             </div>
             <canvas></canvas>
+            
             <div class="genomeStats">
+                <h4>Check results of generation <input type="number" placeholder="1" class="generation-view">:</h4>
+                <br><br>
+                <div class="results">
+                </div>
             </div>
             <div class="controls">
-                <h4>Configuration:</h4>
-                <div class="simulationSpeed">
-                    Simulation Speed: <span>1</span><input class="simulationSpeed" type="range" min="1" max="10" value="1">
+                <div class="currentGeneration">
+                    Running generation 1...
                 </div>
-                <div class="pathTracing">
-                    Path tracing: <input class="pathTracing" type="checkbox"/>
-                </div>
-                <div class="enablePrototypeScrolling">
-                    Enable Scrolling **PROTOTYPE: <input type="checkbox"/>
+                <h4>Telementry:</h4>
+                <div class="telementrywindow">
+                
                 </div>
             </div>
         </div>
         <!--Popups-->
-        <svg class="bestGenome popup"></svg>
         <!--Master script-->
         <script src="./src/main.js" type="module"></script>
     </body>

@@ -2,6 +2,7 @@ import CONFIG from "../config.js";
 import Vector from "./vector.js";
 function runLanders(landers,target,ctx){
     return new Promise(function(res){
+        let emptyRuns = 0;
         let lastRunTime = null;
         let apparentTarget = target.scale(CONFIG.scale,true);//location of target in pixels
         let baselineY =  ctx.canvas.height;
@@ -10,23 +11,36 @@ function runLanders(landers,target,ctx){
             if(lastRunTime===null){
                 lastRunTime = time;
             };
-            let ms = time-lastRunTime;
-            ms *= CONFIG.simulationSpeed;
-            //add logic for stuff;
-            //optimise lander loop
-            for(var lander of landers){
-                lander.update(ms);
+            let ms = (time-lastRunTime)*CONFIG.simulationSpeed;
+            if(emptyRuns < 2){
+                //allow 2 frames of doing nothing for ram to cache
+                ms = 0;
+                emptyRuns += 1;
             }
-            let renderPos;
+            ms = 15;
+            //if(ms>500) ms=2;
+            //add logic for stuff;=
+            let landedCount = 0;
+            for(var lander of landers){
+                if(lander.finished){
+                    landedCount += 1;
+                }else{
+                    lander.update(ms);
+                }
+            }
+            if(landedCount === landers.length){
+                for(let lander of landers){
+                    lander.calculateStats();
+                }
+                res();
+                return;
+            }
             if(ctx){
-                
                 ctx.fillStyle = CONFIG.simulationBackgroundColor;
                 ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
-
                 for(var lander of landers){
-                    renderPos = lander.render(ctx,undefined,cameraOffset,false);
+                    lander.render(ctx,undefined,cameraOffset,false);
                 }
-                
                 ctx.lineWidth= 2;
                 ctx.strokeStyle="black";
                 ctx.fillStyle="black";
@@ -36,7 +50,7 @@ function runLanders(landers,target,ctx){
                 ctx.moveTo(apparentTarget.x,baselineY);
                 ctx.lineTo(apparentTarget.x,baselineY-20);
                 ctx.stroke();
-                //fdraw triangular flag
+                //draw triangular flag
                 ctx.beginPath()
                 ctx.moveTo(apparentTarget.x,baselineY-20);
                 ctx.lineTo(apparentTarget.x+8,baselineY-15);
@@ -49,22 +63,8 @@ function runLanders(landers,target,ctx){
                 ctx.moveTo(0,baselineY);
                 ctx.lineTo(ctx.canvas.width,baselineY);
                 ctx.stroke();
-                if(CONFIG.enablePrototypeScrolling){
-                    if(renderPos.x < ctx.canvas.width*0.1){
-                        cameraOffset.shift(Math.abs(landers[landers.length-1].v.x*ms/1000),0);
-                    }
-                    
-                    if(renderPos.x > ctx.canvas.width*0.9){
-                        cameraOffset.shift(-Math.abs(landers[landers.length-1].v.x*ms/1000),0);
-                    }
-                }
             }
-
-            if(landers.every(l=>l.finished)){
-                res();
-                return;
-            }
-            //ending  stuff
+            //ending stuff
             lastRunTime = time;
             requestAnimationFrame(loop);
         }

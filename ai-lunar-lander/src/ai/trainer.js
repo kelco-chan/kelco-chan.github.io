@@ -3,19 +3,16 @@ import CONFIG from "../config.js";
 import AILander from "./ai-lander.mjs";
 import Vector from "../physics/vector.js";
 import KeyboardLander from "../physics/keyboard-lander.js";
-import drawGraph from "../lib/neataptic-graph.js";
+import RetrogradeLander from "../physics/retrograde-lander.js";
+import DriftLander from "../physics/drift-lander.js";
 import runLanders from "../physics/simulation.js";
-
-const containers = {
-    statsDiv:document.querySelector(".genomeStats")
-}
 
 let {Neat,Methods,Architect} = neataptic;
 
 function initNeat(){
     neataptic.Config.warnings = false;
     return new Neat(
-        4, 3,
+        7, 3,
         null,
         {
             mutation: [
@@ -39,7 +36,24 @@ function initNeat(){
         }
         );
 }
-
+function renderResults(container,generation){
+    let results = localStorage.getItem("results") && JSON.parse(localStorage.getItem("results"));
+    let result = results.find(stats=>stats.generation===generation);
+    if(!result) {container.innerHTML = "Oops. There is no data for generation "+generation+". We are only up to generation "+(results[results.length-1].generation||"0")+"."; return;}
+    let str = "";
+    for(let landerStat of result.stats){
+        str+=`
+        <div>
+            <b>Lander: <code>${landerStat.name}</code></b>
+            > Horizontal Offset: ${landerStat.xoffset} m
+            > Touchdown Velocity: ${landerStat.v} m/s
+            > Fuel used: ${landerStat.fuel} kg
+            --> Overall Score: ${landerStat.score}<--
+        </div>
+        `
+    }
+    container.innerHTML = str.replaceAll("\n","<br>")
+}
 function deviate(maxAmplitude){
     return 2*maxAmplitude*Math.random()-maxAmplitude;
 }
@@ -51,21 +65,21 @@ function deviate(maxAmplitude){
  * @param {Boolean} firstRun 
  * @param {Boolean} loop - whether or not to train again after thsi generation has finished;
  */
+
+let results = [];
 async function train(neat,ctx,firstRun,loop){
     //start the target;
-    
     if(firstRun && localStorage.getItem("population") && localStorage.getItem("population-gen")){
+        results = JSON.parse(localStorage.getItem("results")) || [];
         neat.import(JSON.parse(localStorage.getItem("population")));
         neat.generation = parseInt(localStorage.getItem("population-gen"));
     }
-
     //woah pop into NEXT GENERATION <o/
     neat.generation++;
-    if(firstRun){
-        document.querySelector(".genomeStats").innerHTML=`<b>Computing generation ${neat.generation}...</b>`;
-    }
+    telementry.break();
+    telementry.log("Simulation","Generation "+neat.generation+" begin")
     
-    let target = CONFIG.initialConditions.targetDisplacement.shift(0,CONFIG.landerHeight/2,true);
+    let target = CONFIG.initialConditions.targetDisplacement.shift(/*deviate(30)*/0,CONFIG.landerHeight/2/*+deviate(30)*/,true);
     //init all the landers lol
     let landers = [];
     let startingVelocity = CONFIG.initialConditions.velocity;
@@ -74,38 +88,34 @@ async function train(neat,ctx,firstRun,loop){
     for(let genome of neat.population){
         landers.push(new AILander(startingPos.copy(),target,startingVelocity.copy(),genome));
     }
+
+    landers.push(new DriftLander(startingPos.copy(),target,startingVelocity.copy()));
+    landers.push(new RetrogradeLander(startingPos.copy(),target,startingVelocity.copy()));
     landers.push(new KeyboardLander(startingPos.copy(),target,startingVelocity.copy()));
     
     //run landers
     ctx.font="15px Calibri";
     ctx.fillStyle="#000";
     ctx.clearRect(0,0,CONFIG.width,CONFIG.height);
-    ctx.fillText(`Computing generation ${neat.generation}`,0,30)
-    await runLanders(landers,target,/*null*/(neat.generation%1===0)?ctx:null);
-    debugger;
-    console.log();
-    
-    //render the best genome
-    if(CONFIG.drawNetworkGraph) drawGraph(neat.getFittest().graph(300,300),".bestGenome",600,600);
+    ctx.fillText(`Computing generation ${neat.generation}`,0,30);
+    document.querySelector(".controls .currentGeneration").innerHTML = `Running generation ${neat.generation}...`;
+    await runLanders(landers,target,ctx);
+    //find all special ppl
+    let specialLanders = landers.filter(lander=>!lander.brain);
+    specialLanders.push(neat.getFittest());
     //draw in the stuff
-    let scores = neat.population.map(n=>n.score).sort((a,b)=>b-a)
+    results.push({
+        generation:neat.generation,
+        stats:specialLanders.map(l=>({
+            name:l.name || "AI",
+            xoffset: l.stats.xoffset.toFixed(2),
+            v:l.stats.v.toFixed(2),
+            fuel: l.stats.fuel.toFixed(2),
+            score:l.stats.score.toFixed(2),
+        }))
+    });
 
-    containers.statsDiv.innerHTML += `
-    <b>Generation ${neat.generation} statistics</b>
-    Human Player:
-    Score: ${landers[landers.length-1].stats.score.toFixed(0)}
-
-    AI:
-    Q1 score: ${(scores[Math.floor(scores.length*3/4)]).toFixed(0)}
-    Q3 score: ${(scores[Math.floor(scores.length*1/4)]).toFixed(0)}
-    Max Score: ${neat.getFittest().score.toFixed(0)}
-
-
-    <b> Now Running generation ${neat.generation+1} </b>
-    `.replaceAll("\n","<br>");
-
-    containers.statsDiv.scrollTop  = containers.statsDiv.scrollHeight;
-
+    localStorage.setItem("results",JSON.stringify(results));
     localStorage.setItem("population",JSON.stringify(neat.export()));
     localStorage.setItem("population-gen",neat.generation.toString());
 
@@ -114,7 +124,6 @@ async function train(neat,ctx,firstRun,loop){
     for(var i = 0; i < neat.elitism; i++){
         newPopulation.push(neat.population[i]);
     }
-    
     // Breed the next individuals
     while(newPopulation.length < neat.popsize){
         newPopulation.push(neat.getOffspring());
@@ -124,6 +133,9 @@ async function train(neat,ctx,firstRun,loop){
     neat.population = newPopulation;
     neat.mutate();
     //all over again :)
-    train(neat,ctx);
+    
+    if(loop){
+        train(neat,ctx,false,loop);
+    }
 }
-export {train,initNeat};
+export {train,initNeat,renderResults};
