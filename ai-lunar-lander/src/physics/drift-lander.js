@@ -7,20 +7,15 @@ class DriftLander extends StageLander{
         this.stages = [
             {
                 start:0*1000,
-                dt:27.3*1000,
-                throttle:0.277,
-                angle:0
+                dt:179*1000,
+                throttle:7430 / CONFIG.maxMainNozzleThrust,
+                angle: -0.96
             },{
-                start:27.3*1000,
-                dt:3.12*1000,
-                throttle:1,
-                angle:-1.3
-            },{
-                start:30.4*1000,
-                dt:1.15*1000,
-                throttle: 1,
+                start: 179 * 1000,
+                dt:342 * 1000,
+                throttle: 6180 / CONFIG.maxMainNozzleThrust,//1,
                 angle:0
-            }
+            },
         ];
         this.name="Drifter"
     }

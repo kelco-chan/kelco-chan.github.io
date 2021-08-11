@@ -7,7 +7,11 @@ window.addEventListener("load",function(){
     canvas.height = /*CONFIG.height*/canvas.offsetHeight;
     const ctx = canvas.getContext("2d");
 
-
+    canvas.addEventListener("wheel",function(e){
+        e.preventDefault();
+        CONFIG.set("scale", CONFIG.scale * Math.pow(2, -0.001 * e.deltaY))
+    })
+    
     document.querySelector("input.generation-view").addEventListener("keyup",function(e){
         if(!/^\d+$/.exec(this.value)) return
         renderResults(document.querySelector(".genomeStats .results"),parseInt(this.value))

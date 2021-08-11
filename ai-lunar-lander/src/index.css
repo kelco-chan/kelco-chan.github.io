@@ -16,7 +16,7 @@ div.simulation{
     padding:0;
     display:grid;
     grid-template-columns: 1000px calc(100vw - 1000px);
-    grid-template-rows: 75px 300px calc(100vh - 375px  );
+    grid-template-rows: 75px 400px calc(100vh - 475px  );
 }
 div.simulation > *{
     width: 100% !important;

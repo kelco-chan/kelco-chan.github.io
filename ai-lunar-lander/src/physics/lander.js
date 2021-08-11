@@ -17,7 +17,7 @@ class Lander{
         this.hidden = false;
         this.msElapsed = 0;
         this.target = target;
-        this.stats = {};
+        this.stats = {score:null};
         this.acc = new Vector(0,CONFIG.grav);
         
     }
@@ -34,7 +34,7 @@ class Lander{
             //deduct mass
             this.mass -= CONFIG.maxFuelMassRate * throttle * ms / 1000;
             //add thrust
-            let acc = throttle * CONFIG.maxMainNozzleThrust/this.mass;
+            let acc = throttle * CONFIG.maxMainNozzleThrust/CONFIG.averageMass;
             this.acc.shift(acc * Math.sin(this.a),-acc * Math.cos(this.a));
             //this.v.add(  );
         }else{
@@ -47,12 +47,13 @@ class Lander{
         this.fireNozzle(1,throttles[1],ms);
         this.fireNozzle(2,throttles[2],ms);
     }
+    //called when landed is finished
+    finish(){
+        this.finished = true;
+        this.calculateStats();
+    }
     update(ms){
         if(this.finished) return;
-        if(ms>2000){
-            return;//person left the sim and came back, skip this loop and come back later
-        }
-        this.msElapsed += ms;
         /*ANGULAR VELOCITY*/
         this.a += this.av * ms / 1000;
         /*LINEAR VELOCITY*/
@@ -64,27 +65,23 @@ class Lander{
         //change v
         this.v.add(this.acc.scale(t,true))//v = u+at
 
-        //cap v
-        this.v.x = Math.min(Math.max(-CONFIG.maxComponentSpeed,this.v.x),CONFIG.maxComponentSpeed);
-        this.v.y = Math.min(Math.max(-CONFIG.maxComponentSpeed,this.v.y),CONFIG.maxComponentSpeed);
-
         //clear regesitered acceleration
         this.acc.set(0,CONFIG.grav);
 
         //check if out of bounds
-        if((this.pos.y < -10) || (this.pos.x < -10) || (this.pos.x > CONFIG.width + 10)){
-            this.finished = true;
+        if((this.pos.y < -10) || (this.pos.x < -10) || (this.pos.x > CONFIG.initialConditions.targetDisplacement.x*1.5)){
             this.hidden = true;//hidden since out of bounds
+            this.finish();
         }
         //normal finished
-        if((this.pos.y > this.target.y - CONFIG.landerHeight/2 + 0.3) || (this.msElapsed >= CONFIG.maxFlightTime)){
-            this.finished = true;
-        }
-        if(this.finished){
-            this.calculateStats();
+        if((this.pos.y > this.target.y - CONFIG.landerHeight/2 + 0.3)){
+            this.finish();
         }
     }
     calculateStats(){
+        if(this.stats.score){
+            return this.stats;
+        }
         //add rotation to scoring system
         this.stats = {
             xoffset: Math.abs(this.target.x-this.pos.x),
@@ -93,20 +90,22 @@ class Lander{
             fuel: CONFIG.landerWetMass - this.mass,
             angle:this.a
         }
-        this.stats.score = 0;
-        this.stats.score -= 0.5 * this.stats.fuel;
-        if(Math.abs(this.stats.v) > 1){
-            this.stats.score -= 200 * Math.abs(this.stats.v);
+        this.stats.score = 0;//100_000;
+        this.stats.score -= 0.1 * this.stats.fuel;
+        this.stats.score -= 300 * Math.abs(this.stats.v);
+        if(Math.abs(this.stats.v) > 20){
+            this.stats.score -= 2000;
         }
+        //if not landed
         if(this.stats.yoffset > 10){
-            this.stats.score -= 100 * Math.abs(this.stats.yoffset);
+            this.stats.score -= 300 * Math.abs(this.stats.yoffset);
         }
         //angle
         if(Math.abs(this.stats.a) > 12 / 180 * Math.PI){
             //too tilted
             this.stats.score -= 5000;
         }
-        this.stats.score -= 90 * this.stats.xoffset;
+        this.stats.score -= 0.2 * this.stats.xoffset;
         return this.stats;
     }
     /**

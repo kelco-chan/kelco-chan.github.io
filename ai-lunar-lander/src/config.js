@@ -6,8 +6,9 @@ const CONFIG = {
 
 
     /**LANDER MASS SPECIFICTIONS */
-    landerWetMass: 7678.9, //kg
-    maxFuel: 8248 * 0.1, //kg
+    landerWetMass: 7864, //kg
+    maxFuel: 1009, //kg
+    averageMass:7359,
     landerHeight:7.01, //m
 
 
@@ -20,25 +21,25 @@ const CONFIG = {
 
     /*NEAT evolution CONFIG*/
     PLAYER_AMOUNT:300,
-    MUTATION_RATE:0.7,
-    ELITISM: 100,
+    MUTATION_RATE:0.4,
+    ELITISM: 50,
 
 
     /*Viewport config*/
     width:1000,//px
-    height:700,//px
-    scale: 1.5,//6/7.01, //px m^-1
+    height:400,//px
+    scale: 1.3,//1.5,//6/7.01, //px m^-1
     simulationBackgroundColor:"rgba(255,255,255,1)",
     enablePrototypeScrolling:false,
 
 
     /*SIMULATION CONFIG*/
-    maxFlightTime: 1 * 60 * 1000, //s
+    maxFlightTime: 3 * 60 * 1000, //ms
     simulationSpeed: 1,
     initialConditions:{
-        angularDisplacement:- 16 / 180 * Math.PI,
-        targetDisplacement: new Vector(548.6, 150/*152.4*/),//displacement of target relative to lander;
-        velocity: new Vector(18.3, 4.87)
+        angularDisplacement: -55 / 180 * Math.PI,
+        targetDisplacement: new Vector(8334, 2290),//displacement of target relative to lander;
+        velocity: new Vector(148, 44.2) 
     },
 }
 CONFIG.set = function(property,value){

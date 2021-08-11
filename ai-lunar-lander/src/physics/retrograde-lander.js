@@ -6,16 +6,16 @@ class RetrogradeLander extends StageLander{
         super(...arguments);
         this.stages = [
             {
-                start:8371 - 16,
-                dt:5662,
+                start:18600 - 16,//one frame for good luck
+                dt:31800,
                 throttle:1,
-                angle:-0.584
+                angle:-0.865
             }
         ]
         this.name = "Suicide Burn";
     }
     get KE(){
-        return this.mass*Math.pow(this.v.magnitude,2)/2;
+        return this.mass * Math.pow(this.v.magnitude,2)/2;
     }
     get PE(){
         return this.mass * CONFIG.grav * (CONFIG.initialConditions.targetDisplacement.y-this.pos.y);

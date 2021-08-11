@@ -12,7 +12,7 @@ let {Neat,Methods,Architect} = neataptic;
 function initNeat(){
     neataptic.Config.warnings = false;
     return new Neat(
-        7, 3,
+        5, 4,
         null,
         {
             mutation: [
@@ -25,10 +25,10 @@ function initNeat(){
                 Methods.Mutation.MOD_ACTIVATION,
                 Methods.Mutation.ADD_GATE,
                 Methods.Mutation.SUB_GATE,
-                Methods.Mutation.ADD_SELF_CONN,
-                Methods.Mutation.SUB_SELF_CONN,
-                Methods.Mutation.ADD_BACK_CONN,
-                Methods.Mutation.SUB_BACK_CONN
+                //Methods.Mutation.ADD_SELF_CONN,
+                //Methods.Mutation.SUB_SELF_CONN,
+               // Methods.Mutation.ADD_BACK_CONN,
+                //Methods.Mutation.SUB_BACK_CONN
             ],
             popsize: CONFIG.PLAYER_AMOUNT,
             mutationRate: CONFIG.MUTATION_RATE,
@@ -54,9 +54,6 @@ function renderResults(container,generation){
     }
     container.innerHTML = str.replaceAll("\n","<br>")
 }
-function deviate(maxAmplitude){
-    return 2*maxAmplitude*Math.random()-maxAmplitude;
-}
 
 /**
  * Trains Landers
@@ -79,14 +76,16 @@ async function train(neat,ctx,firstRun,loop){
     telementry.break();
     telementry.log("Simulation","Generation "+neat.generation+" begin")
     
-    let target = CONFIG.initialConditions.targetDisplacement.shift(/*deviate(30)*/0,CONFIG.landerHeight/2/*+deviate(30)*/,true);
+    let target = CONFIG.initialConditions.targetDisplacement.copy()//.scale(0.07 + 0.007 * neat.generation,true);
     //init all the landers lol
     let landers = [];
-    let startingVelocity = CONFIG.initialConditions.velocity;
+    let startingVelocity = CONFIG.initialConditions.velocity.copy()//scale(0.07 + 0.007 * neat.generation,true);
     let startingPos = new Vector(0,0);
-    
+    //startingPos = target.shift(-100,-400,true);
     for(let genome of neat.population){
-        landers.push(new AILander(startingPos.copy(),target,startingVelocity.copy(),genome));
+        let lander = new AILander(startingPos.shift(100*Math.random(),0, true), target, startingVelocity.copy(), genome);
+        lander.a = (Math.PI/20) * (Math.random()-0.5) * 2;
+        landers.push(lander);
     }
 
     landers.push(new DriftLander(startingPos.copy(),target,startingVelocity.copy()));
@@ -102,6 +101,22 @@ async function train(neat,ctx,firstRun,loop){
     await runLanders(landers,target,ctx);
     //find all special ppl
     let specialLanders = landers.filter(lander=>!lander.brain);
+    /*let averageStats = landers.filter(l=>l.brain).reduce((acc,{stats})=>({
+        xoffset:acc.xoffset + stats.xoffset,
+        v:acc.v + stats.v,
+        fuel:acc.fuel + stats.fuel,
+        score:acc.score + stats.score
+    }),{
+        xoffset:0,
+        v:0,
+        fuel:0,
+        score:0
+    });
+    averageStats.xoffset *= (1/landers.length);
+    averageStats.v *= (1/landers.length);
+    averageStats.fuel *= (1/landers.length);
+    averageStats.score *= (1/landers.length);*/
+    
     specialLanders.push(neat.getFittest());
     //draw in the stuff
     results.push({
@@ -114,11 +129,6 @@ async function train(neat,ctx,firstRun,loop){
             score:l.stats.score.toFixed(2),
         }))
     });
-
-    localStorage.setItem("results",JSON.stringify(results));
-    localStorage.setItem("population",JSON.stringify(neat.export()));
-    localStorage.setItem("population-gen",neat.generation.toString());
-
     let newPopulation = [];
     // Elitism
     for(var i = 0; i < neat.elitism; i++){
@@ -134,6 +144,10 @@ async function train(neat,ctx,firstRun,loop){
     neat.mutate();
     //all over again :)
     
+    localStorage.setItem("results",JSON.stringify(results));
+    localStorage.setItem("population",JSON.stringify(neat.export()));
+    localStorage.setItem("population-gen",neat.generation.toString());
+
     if(loop){
         train(neat,ctx,false,loop);
     }
